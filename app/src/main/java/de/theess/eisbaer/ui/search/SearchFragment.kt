@@ -1,10 +1,11 @@
 package de.theess.eisbaer.ui.search
 
+import kotlinx.android.synthetic.main.fragment_search.*
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,14 +14,7 @@ import timber.log.Timber
 
 class SearchFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = SearchFragment()
-    }
-
     private lateinit var viewModel: SearchViewModel
-
-    private var searchView: SearchView? = null
-    private var recycler: androidx.recyclerview.widget.RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +36,7 @@ class SearchFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 //        viewModel.allItems.observe(this, Observer { items -> adapter?.items = items })
 
-        searchView = view.findViewById(R.id.nav_search)
-
-        recycler = view.findViewById(R.id.search_results_recycler)
+        val recycler = search_results_recycler
 
         recycler?.layoutManager = LinearLayoutManager(activity)
 
