@@ -73,9 +73,9 @@ class MainActivity : AppCompatActivity() {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     Timber.d("onQueryTextSubmit: $query")
-                    item.collapseActionView()
+                    // item.collapseActionView()
                     // searchView.hideKeyboard()
-                    searchView.clearFocus()
+                    // searchView.clearFocus()
 
                     navController.navigate(MobileNavigationDirections.actionGlobalNavSearch(query))
 
