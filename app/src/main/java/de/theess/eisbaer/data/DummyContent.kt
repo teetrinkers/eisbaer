@@ -1,10 +1,10 @@
-package de.theess.eisbaer.dummy
+package de.theess.eisbaer.data
 
 import java.util.ArrayList
 import java.util.HashMap
 
 /**
- * Helper class for providing sample content for user interfaces created by
+ * Helper class for providing sample title for user interfaces created by
  * Android template wizards.
  *
  * TODO: Replace all uses of this class before publishing your app.
@@ -14,12 +14,12 @@ object DummyContent {
     /**
      * An array of sample (dummy) items.
      */
-    val ITEMS: MutableList<DummyItem> = ArrayList()
+    val ITEMS: MutableList<Note> = ArrayList()
 
     /**
      * A map of sample (dummy) items, by ID.
      */
-    val ITEM_MAP: MutableMap<String, DummyItem> = HashMap()
+    val ITEM_MAP: MutableMap<String, Note> = HashMap()
 
     private val COUNT = 25
 
@@ -34,13 +34,13 @@ object DummyContent {
         }
     }
 
-    private fun addItem(item: DummyItem) {
+    private fun addItem(item: Note) {
         ITEMS.add(item)
         ITEM_MAP.put(item.id, item)
     }
 
-    private fun createDummyItem(position: Int): DummyItem {
-        return DummyItem(
+    private fun createDummyItem(position: Int): Note {
+        return Note(
             position.toString(),
             "Item " + position,
             makeDetails(position)
@@ -54,12 +54,5 @@ object DummyContent {
             builder.append("\nMore details information here.")
         }
         return builder.toString()
-    }
-
-    /**
-     * A dummy item representing a piece of content.
-     */
-    data class DummyItem(val id: String, val content: String, val details: String) {
-        override fun toString(): String = content
     }
 }

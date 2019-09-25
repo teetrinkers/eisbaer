@@ -1,25 +1,31 @@
 package de.theess.eisbaer
 
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import androidx.navigation.findNavController
-import androidx.drawerlayout.widget.DrawerLayout
-import com.google.android.material.navigation.NavigationView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import com.google.android.material.navigation.NavigationView
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -37,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
+                R.id.nav_search,
                 R.id.nav_home
             ), drawerLayout
         )
@@ -48,8 +55,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         Timber.d("onCreateOptionsMenu")
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_overflow, menu)
+        menu.findItem(R.id.nav_search)?.let {
+            setUpSearchListener(it)
+        }
         return true
     }
 
@@ -61,5 +70,31 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return item.onNavDestinationSelected(findNavController(R.id.nav_host_fragment))
                 || super.onOptionsItemSelected(item)
+    }
+
+    private fun setUpSearchListener(item: MenuItem) {
+        val searchView = item.actionView as? SearchView
+
+        searchView?.apply {
+            queryHint = resources.getString(R.string.search_hint)
+
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    Timber.d("onQueryTextSubmit: $query")
+                    item.collapseActionView()
+                    // searchView.hideKeyboard()
+                    searchView.clearFocus()
+                    navController.navigate(R.id.nav_search, Bundle().apply {
+                        putString("Query", query)
+                    }, NavOptions.Builder().setPopUpTo(R.id.nav_search, true).build())
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    Timber.d("onQueryTextChange: $newText")
+                    return false
+                }
+            })
+        }
     }
 }

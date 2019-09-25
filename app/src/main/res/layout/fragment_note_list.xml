@@ -9,5 +9,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".NoteFragment"
-    tools:listitem="@layout/fragment_note" />
+    tools:context=".ui.search.NoteFragment"
+    tools:listitem="@layout/search_result_card" />
