@@ -7,11 +7,13 @@ import de.theess.eisbaer.data.Note
 import de.theess.eisbaer.data.NoteRepository
 
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: NoteRepository
-    val allItems : LiveData<List<Note>>
+    private val repository: NoteRepository = NoteRepository(application)
 
-    init {
-        repository = NoteRepository(application)
-        allItems = repository.allItems
+    fun getAll() : List<Note> {
+        return repository.getAll()
+    }
+
+    fun query(query : String) : List<Note> {
+        return repository.query(query)
     }
 }

@@ -6,14 +6,18 @@
     app:startDestination="@id/nav_search">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="de.theess.eisbaer.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
-    <fragment
         android:id="@+id/nav_search"
         android:name="de.theess.eisbaer.ui.search.SearchFragment"
         android:label="@string/menu_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search" >
+        <argument
+            android:name="query"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_nav_search"
+        app:destination="@id/nav_search"
+        app:popUpTo="@id/nav_search" />
 
 </navigation>
