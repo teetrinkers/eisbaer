@@ -15,9 +15,5 @@
             app:argType="string"
             app:nullable="true" />
     </fragment>
-    <action
-        android:id="@+id/action_global_nav_search"
-        app:destination="@id/nav_search"
-        app:popUpTo="@id/nav_search" />
 
 </navigation>

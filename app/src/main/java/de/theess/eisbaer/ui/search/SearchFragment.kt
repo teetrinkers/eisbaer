@@ -3,22 +3,35 @@ package de.theess.eisbaer.ui.search
 import kotlinx.android.synthetic.main.fragment_search.*
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.theess.eisbaer.R
 import timber.log.Timber
 
-class SearchFragment : Fragment() {
+class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private lateinit var viewModel: SearchViewModel
+    private lateinit var adapter: SearchResultAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Timber.d("onCreate")
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(false)
+        setHasOptionsMenu(true)
+        viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        Timber.d("onCreateOptionsMenu")
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.option_search, menu)
+
+        // Initialize Search View
+        val searchItem = menu.findItem(R.id.item_search)
+        val searchView = searchItem?.actionView as SearchView
+        searchView.setOnQueryTextListener(this)
     }
 
     override fun onCreateView(
@@ -29,27 +42,37 @@ class SearchFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Timber.d("onViewCreated")
         super.onViewCreated(view, savedInstanceState)
 
-        Timber.d("onViewCreated")
-
-        viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 //        viewModel.allItems.observe(this, Observer { items -> adapter?.items = items })
 
-        val recycler = search_results_recycler
 
-        recycler?.layoutManager = LinearLayoutManager(activity)
+        search_results_recycler?.layoutManager = LinearLayoutManager(activity)
 
-        val adapter = SearchResultAdapter()
-        recycler?.adapter = adapter
+        adapter = SearchResultAdapter()
+        search_results_recycler?.adapter = adapter
 
-        val query = arguments?.get("query") as? String
-        Timber.d("query: %s", query)
-        if (query == null) {
-            adapter.items = viewModel.getAll()
-        } else {
-            adapter.items = viewModel.query(query)
-        }
+        showAllItems()
     }
 
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        return false
+    }
+
+    override fun onQueryTextChange(query: String?): Boolean {
+        if (query != null) {
+            query(query)
+        }
+        return true
+    }
+
+    private fun showAllItems() {
+        adapter.items = viewModel.getAll()
+    }
+
+    private fun query(query: String) {
+        Timber.d("query: $query")
+        adapter.items = viewModel.query(query)
+    }
 }

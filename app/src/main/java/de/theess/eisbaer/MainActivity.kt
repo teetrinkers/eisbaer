@@ -47,10 +47,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         Timber.d("onCreateOptionsMenu")
-        menuInflater.inflate(R.menu.menu_overflow, menu)
-        menu.findItem(R.id.nav_search)?.let {
-            setUpSearchListener(it)
-        }
         return true
     }
 
@@ -62,31 +58,5 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return item.onNavDestinationSelected(findNavController(R.id.nav_host_fragment))
                 || super.onOptionsItemSelected(item)
-    }
-
-    private fun setUpSearchListener(item: MenuItem) {
-        val searchView = item.actionView as? SearchView
-
-        searchView?.apply {
-            queryHint = resources.getString(R.string.search_hint)
-
-            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    Timber.d("onQueryTextSubmit: $query")
-                    // item.collapseActionView()
-                    // searchView.hideKeyboard()
-                    // searchView.clearFocus()
-
-                    navController.navigate(MobileNavigationDirections.actionGlobalNavSearch(query))
-
-                    return true
-                }
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    Timber.d("onQueryTextChange: $newText")
-                    return false
-                }
-            })
-        }
     }
 }
