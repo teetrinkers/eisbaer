@@ -1,20 +1,19 @@
 package de.theess.eisbaer.ui.search
 
-import kotlinx.android.synthetic.main.fragment_search.*
-
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.theess.eisbaer.R
+import kotlinx.android.synthetic.main.fragment_search.*
 import timber.log.Timber
 
 class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private lateinit var viewModel: SearchViewModel
-    private lateinit var adapter: SearchResultAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Timber.d("onCreate")
@@ -45,15 +44,13 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         Timber.d("onViewCreated")
         super.onViewCreated(view, savedInstanceState)
 
-//        viewModel.allItems.observe(this, Observer { items -> adapter?.items = items })
-
-
         search_results_recycler?.layoutManager = LinearLayoutManager(activity)
 
-        adapter = SearchResultAdapter()
+        val adapter = SearchResultAdapter()
         search_results_recycler?.adapter = adapter
 
-        showAllItems()
+        viewModel.results.observe(this, Observer { items -> adapter.items = items })
+        viewModel.query(viewModel.query.value ?: "")
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
@@ -61,18 +58,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     override fun onQueryTextChange(query: String?): Boolean {
-        if (query != null) {
-            query(query)
-        }
+        viewModel.query(query ?: "")
         return true
-    }
-
-    private fun showAllItems() {
-        adapter.items = viewModel.getAll()
-    }
-
-    private fun query(query: String) {
-        Timber.d("query: $query")
-        adapter.items = viewModel.query(query)
     }
 }

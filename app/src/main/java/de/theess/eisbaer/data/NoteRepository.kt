@@ -2,7 +2,7 @@ package de.theess.eisbaer.data
 
 import android.app.Application
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import timber.log.Timber
 
 class NoteRepository(application: Application) {
     private val dao: NoteDao
@@ -11,12 +11,14 @@ class NoteRepository(application: Application) {
         dao = NoteDao()
     }
 
-    fun getAll() : List<Note> {
-        return dao.getAllNotes().value!!
+    fun getAll() : LiveData<List<Note>> {
+        Timber.d("getAll")
+        return dao.getAllNotes()
     }
 
-    fun query(query: String): List<Note> {
-        return dao.getAllNotes().value!!.filter { note -> note.title.contains(query) }
+    fun query(query: String): LiveData<List<Note>> {
+        Timber.d("query: $query")
+        return dao.query(query)
     }
 
 }
