@@ -31,6 +31,12 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         val searchItem = menu.findItem(R.id.item_search)
         val searchView = searchItem?.actionView as SearchView
         searchView.setOnQueryTextListener(this)
+
+        // Show current query in the search view.
+        val currentQuery = viewModel.query.value
+        if (currentQuery != null && currentQuery.isNotEmpty())
+            searchItem.expandActionView()
+        searchView.setQuery(currentQuery, true)
     }
 
     override fun onCreateView(
@@ -50,7 +56,6 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         search_results_recycler?.adapter = adapter
 
         viewModel.results.observe(this, Observer { items -> adapter.items = items })
-        viewModel.query(viewModel.query.value ?: "")
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
