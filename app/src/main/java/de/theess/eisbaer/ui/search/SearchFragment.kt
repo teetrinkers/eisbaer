@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.theess.eisbaer.R
+import de.theess.eisbaer.data.Note
 import kotlinx.android.synthetic.main.fragment_search.*
 import timber.log.Timber
 
@@ -52,7 +53,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
         search_results_recycler?.layoutManager = LinearLayoutManager(activity)
 
-        val adapter = SearchResultAdapter()
+        val adapter = SearchResultAdapter(this::searchItemClicked)
         search_results_recycler?.adapter = adapter
 
         viewModel.results.observe(this, Observer { items -> adapter.items = items })
@@ -65,5 +66,9 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
     override fun onQueryTextChange(query: String?): Boolean {
         viewModel.query(query ?: "")
         return true
+    }
+
+    private fun searchItemClicked(note : Note) {
+        Timber.d("clicked: $note")
     }
 }

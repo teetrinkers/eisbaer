@@ -14,11 +14,18 @@ import kotlinx.android.synthetic.main.search_result_card.view.*
 
 /**
  */
-class SearchResultAdapter : RecyclerView.Adapter<SearchResultAdapter.ViewHolder>() {
+class SearchResultAdapter(private val clickListener: (Note) -> Unit) :
+    RecyclerView.Adapter<SearchResultAdapter.ViewHolder>() {
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.title
-        val details: TextView = view.details
+    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+        private val title: TextView = view.title
+        private val details: TextView = view.details
+
+        fun bind(note: Note, clickListener: (Note) -> Unit) {
+            title.text = note.title
+            details.text = note.content
+            view.setOnClickListener { clickListener(note) }
+        }
 
         override fun toString(): String {
             return super.toString() + " '" + title.text + "'"
@@ -38,10 +45,8 @@ class SearchResultAdapter : RecyclerView.Adapter<SearchResultAdapter.ViewHolder>
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        holder.title.text = item.title
-        holder.details.text = item.content
-        holder.view.tag = item
+        val note = items[position]
+        holder.bind(note, clickListener)
     }
 
     override fun getItemCount(): Int = items.size
