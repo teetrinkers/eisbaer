@@ -51,7 +51,8 @@ object DummyContent {
         val builder = StringBuilder()
         builder.append("Details about Item: ").append(position)
         for (i in 0..position - 1) {
-            builder.append("\nMore details information here.")
+            builder.append("\n\n")
+                .append("Feugiat sociis tincidunt dictum lorem gravida ornare non curabitur, dictumst orci pretium amet cubilia egestas interdum. Interdum euismod augue platea malesuada viverra felis primis, parturient nullam porttitor quis fermentum urna lacus ultricies, tempus risus tincidunt eget ornare scelerisque. Ultricies conubia mattis nisi porta aptent eleifend sed bibendum vestibulum, nibh adipiscing varius tellus mauris sapien lorem sit dolor, facilisi amet laoreet lectus interdum habitasse aliquam quis.")
         }
         return builder.toString()
     }
