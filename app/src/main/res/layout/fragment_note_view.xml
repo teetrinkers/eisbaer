@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:fontFamily="monospace"
+        android:textColor="@color/textMain"
         android:textIsSelectable="true" />
 
 </androidx.core.widget.NestedScrollView>
