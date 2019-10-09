@@ -12,4 +12,9 @@ class NoteDao {
         val filtered = DummyContent.ITEMS.filter { note -> note.title.contains(query) }
         return MutableLiveData(filtered)
     }
+
+    fun getById(id: String): LiveData<Note> {
+        return DummyContent.ITEMS.stream().filter { note -> note.id == id }
+            .map { MutableLiveData(it) }.findFirst().orElseGet { MutableLiveData() }
+    }
 }

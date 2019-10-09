@@ -14,6 +14,16 @@
             android:name="query"
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_search_to_noteView"
+            app:destination="@id/nav_noteView" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_noteView"
+        android:name="de.theess.eisbaer.ui.note.NoteViewFragment">
+        <argument
+            android:name="noteId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

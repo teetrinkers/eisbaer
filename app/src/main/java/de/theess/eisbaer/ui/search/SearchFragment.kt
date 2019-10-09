@@ -6,6 +6,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.theess.eisbaer.R
 import de.theess.eisbaer.data.Note
@@ -70,5 +71,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private fun searchItemClicked(note : Note) {
         Timber.d("clicked: $note")
+        val action = SearchFragmentDirections.actionSearchToNoteView(note.id)
+        findNavController().navigate(action)
     }
 }

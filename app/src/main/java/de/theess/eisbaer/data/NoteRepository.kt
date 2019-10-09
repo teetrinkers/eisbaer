@@ -1,17 +1,11 @@
 package de.theess.eisbaer.data
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import timber.log.Timber
 
-class NoteRepository(application: Application) {
-    private val dao: NoteDao
+class NoteRepository private constructor(private val dao: NoteDao) {
 
-    init {
-        dao = NoteDao()
-    }
-
-    fun getAll() : LiveData<List<Note>> {
+    fun getAll(): LiveData<List<Note>> {
         Timber.d("getAll")
         return dao.getAllNotes()
     }
@@ -21,4 +15,19 @@ class NoteRepository(application: Application) {
         return dao.query(query)
     }
 
+    fun getById(id: String): LiveData<Note> {
+        Timber.d("getById: $id")
+        return dao.getById(id)
+    }
+
+    companion object {
+        // For Singleton instantiation
+        @Volatile
+        private var instance: NoteRepository? = null
+
+        fun getInstance() =
+            instance ?: synchronized(this) {
+                instance ?: NoteRepository(NoteDao()).also { instance = it }
+            }
+    }
 }
