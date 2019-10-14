@@ -25,5 +25,9 @@
             android:name="noteId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_prefs"
+        android:name="de.theess.eisbaer.ui.prefs.PreferencesFragment"
+        android:label="@string/menu_preferences" />
 
 </navigation>

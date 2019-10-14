@@ -17,4 +17,8 @@
 
     <string name="menu_home">Home</string>
     <string name="menu_search">Search</string>
+    <string name="menu_preferences">Settings</string>
+
+    <string name="pref_database_button">pref_database_button</string>
+    <string name="pref_database_title">Bear SQLite Database</string>
 </resources>

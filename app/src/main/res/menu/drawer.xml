@@ -7,6 +7,9 @@
         <item
             android:id="@+id/nav_search"
             android:title="@string/menu_search" />
+        <item
+            android:id="@+id/nav_prefs"
+            android:title="@string/menu_preferences" />
     </group>
 
 </menu>

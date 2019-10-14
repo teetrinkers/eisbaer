@@ -16,4 +16,8 @@ class EisbaerApplication : Application() {
             Timber.plant(NoLogTree())
         }
     }
+
+    companion object {
+        const val PREF_DATABASE_URI: String = "database_uri"
+    }
 }
