@@ -12,6 +12,9 @@ import androidx.navigation.fragment.navArgs
 import de.theess.eisbaer.R
 import kotlinx.android.synthetic.main.fragment_note_view.*
 
+/**
+ * Shows the text content of a note.
+ */
 class NoteViewFragment : Fragment() {
 
     private lateinit var viewModel: NoteViewViewModel
@@ -31,6 +34,8 @@ class NoteViewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Set action bar title
         viewModel.note(args.noteId)
             .observe(this, Observer { note ->
                 note_detail_text.text = note.content

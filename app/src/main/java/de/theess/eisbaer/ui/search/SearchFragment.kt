@@ -13,6 +13,9 @@ import de.theess.eisbaer.data.Note
 import kotlinx.android.synthetic.main.fragment_search.*
 import timber.log.Timber
 
+/**
+ * Shows a list of notes, which can be filtered using the search view in the app bar.
+ */
 class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private lateinit var viewModel: SearchViewModel
@@ -69,7 +72,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         return true
     }
 
-    private fun searchItemClicked(note : Note) {
+    private fun searchItemClicked(note: Note) {
         Timber.d("clicked: $note")
         val action = SearchFragmentDirections.actionSearchToNoteView(note.id)
         findNavController().navigate(action)
