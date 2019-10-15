@@ -33,7 +33,7 @@ class NoteRepository private constructor(private val store: KotlinEntityDataStor
     }
 
     companion object {
-        const val QUERY_LIMIT = 100
+        const val QUERY_LIMIT = 200
 
         // For Singleton instantiation
         @Volatile
