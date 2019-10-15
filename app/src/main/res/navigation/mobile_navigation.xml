@@ -23,7 +23,7 @@
         android:name="de.theess.eisbaer.ui.note.NoteViewFragment">
         <argument
             android:name="noteId"
-            app:argType="string" />
+            app:argType="long" />
     </fragment>
     <fragment
         android:id="@+id/nav_prefs"

@@ -11,7 +11,7 @@ import timber.log.Timber
 import java.util.*
 
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: NoteRepository = NoteRepository.getInstance()
+    private val repository: NoteRepository = NoteRepository.getInstance(application)
 
     private val _query = MutableLiveData<String>()
     val query: LiveData<String>

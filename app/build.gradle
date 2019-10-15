@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'androidx.navigation.safeargs'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
@@ -53,4 +54,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    // requery
+    implementation 'io.requery:requery:1.6.0'
+    implementation 'io.requery:requery-android:1.6.0'
+    implementation 'io.requery:requery-kotlin:1.6.0'
+    kapt 'io.requery:requery-processor:1.6.0'
 }

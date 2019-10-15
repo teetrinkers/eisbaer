@@ -23,7 +23,7 @@ class SearchResultAdapter(private val clickListener: (Note) -> Unit) :
 
         fun bind(note: Note, clickListener: (Note) -> Unit) {
             title.text = note.title
-            details.text = note.content
+            details.text = note.subtitle
             view.setOnClickListener { clickListener(note) }
         }
 
