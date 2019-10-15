@@ -21,6 +21,8 @@
             android:layout_marginStart="@dimen/text_margin"
             android:layout_marginTop="@dimen/text_margin"
             android:layout_marginEnd="@dimen/text_margin"
+            android:layout_marginBottom="@dimen/search_result_subtitle_spacing"
+            android:maxLines="2"
             android:textAppearance="?attr/textAppearanceListItem" />
 
         <TextView
@@ -33,6 +35,7 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="@android:color/darker_gray"
             android:textSize="@dimen/text_size_smaller" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
