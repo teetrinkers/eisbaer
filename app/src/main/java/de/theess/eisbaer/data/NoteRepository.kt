@@ -1,34 +1,37 @@
 package de.theess.eisbaer.data
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import io.requery.kotlin.*
-import io.requery.query.Result
-import io.requery.sql.KotlinEntityDataStore
+import de.theess.eisbaer.EisbaerApplication
+import io.requery.kotlin.desc
+import io.requery.kotlin.like
 import timber.log.Timber
 
-class NoteRepository private constructor(private val store: KotlinEntityDataStore<Any>) {
+class NoteRepository private constructor(private val holder: EntityStoreHolder) {
 
     fun getAll(): LiveData<List<Note>> {
         Timber.d("getAll")
-        val result: Offset<Result<Note>> =
-            store select (Note::class) orderBy (Note::modificationDateRaw.desc()) limit QUERY_LIMIT
-        return MutableLiveData(result.get().toList())
+        return holder.store
+            ?.run { select(Note::class) orderBy (Note::modificationDateRaw.desc()) limit QUERY_LIMIT }
+            ?.let { MutableLiveData(it.get().toList()) }
+            ?: MutableLiveData()
     }
 
     fun query(query: String): LiveData<List<Note>> {
         Timber.d("query: $query")
-        val result =
-            store select (Note::class) where (Note::content.like("%$query%")) orderBy (Note::modificationDateRaw.desc()) limit QUERY_LIMIT
-        val resultList = result.get().toList()
-        Timber.d("query result count: ${resultList.size}")
-        return MutableLiveData(resultList)
+        return holder.store
+            ?.run { select(Note::class) where (Note::content.like("%$query%")) orderBy (Note::modificationDateRaw.desc()) limit QUERY_LIMIT }
+            ?.get()?.toList()
+            .also { Timber.d("query result count: ${it?.size}") }
+            ?.let { MutableLiveData(it) }
+            ?: MutableLiveData()
     }
 
     fun getById(id: Long): LiveData<Note> {
         Timber.d("getById: $id")
-        return store.findByKey(Note::class, id)?.let { it -> MutableLiveData(it) }
+        return holder.store
+            ?.findByKey(Note::class, id)
+            ?.let { MutableLiveData(it) }
             ?: MutableLiveData()
     }
 
@@ -39,9 +42,9 @@ class NoteRepository private constructor(private val store: KotlinEntityDataStor
         @Volatile
         private var instance: NoteRepository? = null
 
-        fun getInstance(context: Context) =
+        fun getInstance(application: EisbaerApplication) =
             instance ?: synchronized(this) {
-                instance ?: NoteRepository(NoteDatabase.getDataStore(context)).also {
+                instance ?: NoteRepository(application.database.entityStoreHolder).also {
                     instance = it
                 }
             }
