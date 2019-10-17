@@ -17,7 +17,6 @@ import timber.log.Timber
  * Shows a list of notes, which can be filtered using the search view in the app bar.
  */
 class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
-
     private lateinit var viewModel: SearchViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,15 +32,22 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         inflater.inflate(R.menu.option_search, menu)
 
         // Initialize Search View
-        val searchItem = menu.findItem(R.id.item_search)
-        val searchView = searchItem?.actionView as SearchView
+        val searchView = menu.findItem(R.id.item_search)?.actionView as SearchView
+        searchView.queryHint = getString(R.string.search_hint)
         searchView.setOnQueryTextListener(this)
 
+        // Hide the keyboard when the search view loses focus.
+        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            if (!hasFocus)
+                searchView.clearFocus()
+        }
+
+        // Make search view always expanded
+        searchView.setIconifiedByDefault(false)
+        searchView.maxWidth = Integer.MAX_VALUE
+
         // Show current query in the search view.
-        val currentQuery = viewModel.query.value
-        if (currentQuery != null && currentQuery.isNotEmpty())
-            searchItem.expandActionView()
-        searchView.setQuery(currentQuery, true)
+        searchView.setQuery(viewModel.query.value, true)
     }
 
     override fun onCreateView(
