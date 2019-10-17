@@ -79,7 +79,7 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     private fun searchItemClicked(note: Note) {
-        Timber.d("clicked: $note")
+        Timber.d("clicked: ${note.id}")
         val action = SearchFragmentDirections.actionSearchToNoteView(note.id)
         findNavController().navigate(action)
     }

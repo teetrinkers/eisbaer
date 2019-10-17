@@ -62,4 +62,10 @@ dependencies {
     implementation 'io.requery:requery-android:1.6.0'
     implementation 'io.requery:requery-kotlin:1.6.0'
     kapt 'io.requery:requery-processor:1.6.0'
+
+    // markwon
+    implementation "io.noties.markwon:core:$markwon_version"
+    implementation "io.noties.markwon:ext-strikethrough:$markwon_version"
+    implementation "io.noties.markwon:linkify:$markwon_version"
+    implementation "io.noties.markwon:ext-tasklist:$markwon_version"
 }

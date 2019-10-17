@@ -15,10 +15,10 @@ This app can browse notes from an SQLite database which was edited using the Bea
 
 * Show notes (read-only)
 * Search notes
+* Markdown is rendered
 
 ### Not Now / Maybe later
 
-* Render markdown
 * List of tags
 * Support for images and attachments  
 * Some kind of sync
@@ -26,6 +26,7 @@ This app can browse notes from an SQLite database which was edited using the Bea
 ### Probably never
 
 * Edit notes
+* Encrypted notes
 
 ## Why requery and not Room?
 
