@@ -24,4 +24,7 @@ interface Note : Persistable {
 
     @get:Column(name = "ZMODIFICATIONDATE")
     var modificationDateRaw: String
+
+    @get:Column(name = "ZTRASHED")
+    var trashed : Int
 }
