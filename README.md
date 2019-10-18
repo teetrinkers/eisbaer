@@ -28,6 +28,10 @@ This app can browse notes from an SQLite database which was edited using the Bea
 * Edit notes
 * Encrypted notes
 
+## Screenshots
+
+![Note List](doc/screenshot_note_list.png) ![Note](doc/screenshot_note.png)
+
 ## Why requery and not Room?
 
 This app uses [requery](https://github.com/requery/requery/) to read the SQLite database, because it supports partial models. With Room, the model entities must match the exact table specification or the database cannot be opened. 
