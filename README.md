@@ -30,7 +30,7 @@ This app can browse notes from an SQLite database which was edited using the Bea
 
 ## Screenshots
 
-![Note List](doc/screenshot_note_list.png) ![Note](doc/screenshot_note.png)
+![Note List](docs/screenshot_note_list.png) ![Note](docs/screenshot_note.png)
 
 ## Why requery and not Room?
 
