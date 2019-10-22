@@ -2,25 +2,25 @@ package de.theess.eisbaer.ui.note
 
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
-import io.noties.markwon.Markwon
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
-import io.noties.markwon.linkify.LinkifyPlugin
-import kotlinx.android.synthetic.main.fragment_note_view.*
-import android.text.util.Linkify
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.viewModels
 import de.theess.eisbaer.R
 import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonVisitor
 import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tasklist.TaskListPlugin
+import io.noties.markwon.linkify.LinkifyPlugin
+import kotlinx.android.synthetic.main.fragment_note_view.*
 import org.commonmark.node.SoftLineBreak
 import timber.log.Timber
 
@@ -32,10 +32,6 @@ class NoteViewFragment : Fragment() {
 
     private val viewModel: NoteViewViewModel by viewModels()
     private val args: NoteViewFragmentArgs by navArgs()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
