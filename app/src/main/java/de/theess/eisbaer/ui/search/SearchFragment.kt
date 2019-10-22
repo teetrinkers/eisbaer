@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.theess.eisbaer.R
@@ -17,13 +17,12 @@ import timber.log.Timber
  * Shows a list of notes, which can be filtered using the search view in the app bar.
  */
 class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel: SearchViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Timber.d("onCreate")
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

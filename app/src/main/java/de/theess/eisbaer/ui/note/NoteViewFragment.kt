@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
@@ -16,6 +15,7 @@ import io.noties.markwon.linkify.LinkifyPlugin
 import kotlinx.android.synthetic.main.fragment_note_view.*
 import android.text.util.Linkify
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import de.theess.eisbaer.R
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.MarkwonVisitor
@@ -30,12 +30,11 @@ import timber.log.Timber
  */
 class NoteViewFragment : Fragment() {
 
-    private lateinit var viewModel: NoteViewViewModel
+    private val viewModel: NoteViewViewModel by viewModels()
     private val args: NoteViewFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(NoteViewViewModel::class.java)
     }
 
     override fun onCreateView(
