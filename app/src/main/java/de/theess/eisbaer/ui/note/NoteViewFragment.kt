@@ -61,7 +61,7 @@ class NoteViewFragment : Fragment() {
                     builder.blockQuoteColor(primaryColor)
                     builder.blockQuoteWidth(4)
                     builder.headingBreakHeight(0)
-                    builder.headingTextSizeMultipliers(floatArrayOf(1.5f, 1.3f, 1.1f, 1f, 1f, 1f))
+                    builder.headingTextSizeMultipliers(floatArrayOf(1.35f, 1.25f, 1.1f, 1f, 1f, 1f))
                     builder.thematicBreakHeight(2)
                     builder.linkColor(primaryColor)
                 }

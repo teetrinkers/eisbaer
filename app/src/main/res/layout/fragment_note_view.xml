@@ -16,6 +16,7 @@
         android:fontFamily="sans-serif-light"
         android:textColor="@color/textMain"
         android:textColorLink="@color/colorPrimary"
-        android:textIsSelectable="true" />
+        android:textIsSelectable="true"
+        android:textSize="@dimen/text_size_small" />
 
 </androidx.core.widget.NestedScrollView>
