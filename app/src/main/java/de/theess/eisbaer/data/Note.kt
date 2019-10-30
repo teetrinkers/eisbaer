@@ -1,6 +1,10 @@
 package de.theess.eisbaer.data
 
-import io.requery.*
+import io.requery.Column
+import io.requery.Entity
+import io.requery.Key
+import io.requery.Persistable
+import io.requery.Table
 
 @Entity
 @Table(name = "ZSFNOTE")

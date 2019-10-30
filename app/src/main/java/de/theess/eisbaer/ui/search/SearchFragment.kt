@@ -64,11 +64,18 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
         Timber.d("onViewCreated")
         super.onViewCreated(view, savedInstanceState)
 
+        // Set query from navigation arguments.
+        arguments?.getString("query")?.also { query ->
+            Timber.d("args: $query")
+            viewModel.query(query)
+        }
+
         search_results_recycler?.layoutManager = LinearLayoutManager(activity)
 
         val adapter = SearchResultAdapter(this::searchItemClicked)
         search_results_recycler?.adapter = adapter
 
+        // Observe query results.
         viewModel.results.observe(this, Observer { items -> adapter.items = items })
     }
 

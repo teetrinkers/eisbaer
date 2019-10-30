@@ -10,6 +10,7 @@
         <item
             android:id="@+id/nav_prefs"
             android:title="@string/menu_preferences" />
+        <group android:id="@+id/drawer_menu_group_tags" />
     </group>
 
 </menu>

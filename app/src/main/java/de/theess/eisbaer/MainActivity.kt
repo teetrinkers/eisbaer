@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
@@ -14,6 +15,8 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import de.theess.eisbaer.data.TagRepository
+import de.theess.eisbaer.ui.note.NoteViewFragmentDirections
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import timber.log.Timber
@@ -45,8 +48,30 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        // Add tags from the database to the drawer menu
+        TagRepository.getInstance(application as EisbaerApplication).getAll()
+            .observe(this, Observer { tags ->
+                navView.menu.removeGroup(R.id.drawer_menu_group_tags)
+                tags.map { it.title }
+                    .forEach { tag ->
+                        addTagMenuItem(navView.menu, tag)
+                    }
+            })
     }
 
+    /**
+     * Adds a menu item which when clicked will navigate to the search fragment with the tag name
+     * given as the query.
+     */
+    private fun addTagMenuItem(menu: Menu, tagName: String) {
+        val menuItem = menu.add(R.id.drawer_menu_group_tags, Menu.NONE, 0, tagName)
+        val action = NoteViewFragmentDirections.actionGlobalNavSearch("#" + tagName)
+        menuItem.setOnMenuItemClickListener {
+            navController.navigate(action)
+            false
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         Timber.d("onCreateOptionsMenu")

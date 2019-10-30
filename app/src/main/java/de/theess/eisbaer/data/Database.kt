@@ -9,6 +9,7 @@ import android.net.Uri
 import androidx.preference.PreferenceManager
 import de.theess.eisbaer.BuildConfig
 import de.theess.eisbaer.EisbaerApplication
+import de.theess.eisbaer.Models
 import io.requery.android.sqlite.DatabaseSource
 import io.requery.sql.KotlinEntityDataStore
 import timber.log.Timber
