@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         val action = NoteViewFragmentDirections.actionGlobalNavSearch("#" + tagName)
         menuItem.setOnMenuItemClickListener {
             navController.navigate(action)
+            // Let the system handle this as well to close the drawer.
             false
         }
     }
