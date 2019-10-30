@@ -3,14 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_search"
-            android:title="@string/menu_search" />
-        <item
-            android:id="@+id/nav_prefs"
-            android:title="@string/menu_preferences" />
-        <group android:id="@+id/drawer_menu_group_tags" />
-    </group>
+    <item
+        android:id="@+id/nav_search"
+        android:title="@string/menu_search" />
+    <item
+        android:id="@+id/nav_prefs"
+        android:title="@string/menu_preferences" />
+    <group android:id="@+id/drawer_menu_group_tags" />
 
 </menu>
