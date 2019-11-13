@@ -6,11 +6,11 @@ import de.theess.eisbaer.EisbaerApplication
 import io.requery.kotlin.asc
 import timber.log.Timber
 
-class TagRepository private constructor(private val holder: EntityStoreHolder) {
+class TagRepository private constructor(private val database: Database) {
 
     fun getAll(): LiveData<List<Tag>> {
         Timber.d("getAll")
-        return holder.store
+        return database.store
             ?.run {
                 select(Tag::class)
                     .orderBy(Tag::title.asc()).limit(QUERY_LIMIT)
@@ -28,7 +28,7 @@ class TagRepository private constructor(private val holder: EntityStoreHolder) {
 
         fun getInstance(application: EisbaerApplication) =
             instance ?: synchronized(this) {
-                instance ?: TagRepository(application.database.entityStoreHolder).also {
+                instance ?: TagRepository(application.database).also {
                     instance = it
                 }
             }

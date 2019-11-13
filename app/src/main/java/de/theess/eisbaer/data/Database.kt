@@ -23,6 +23,8 @@ import java.io.FileOutputStream
  */
 class Database(private val context: Context) {
 
+    var store: KotlinEntityDataStore<Any>? = null
+
     /**
      * Open the database once to initialize the android_metadata table.
      * https://github.com/requery/requery/issues/856
@@ -38,7 +40,7 @@ class Database(private val context: Context) {
         }
     }
 
-    val entityStoreHolder: EntityStoreHolder = EntityStoreHolder(null)
+    private val listeners: MutableList<DatabaseListener> = mutableListOf()
 
     /**
      * Size of the external database. This value is persisted to the preferences.
@@ -58,16 +60,13 @@ class Database(private val context: Context) {
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == EisbaerApplication.PREF_DATABASE_URI) synchronized(this) {
                 Timber.d("database uri pref changed")
+                dbFileSize = 0
                 updateDatabase()
             }
         }
 
-    init {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
-        dbFileSize = preferences.getInt(EisbaerApplication.PREF_DATABASE_FILE_SIZE, 0)
-        updateDatabase()
-        if (!isOpen()) openDatabase()
+    fun addListener(listener: DatabaseListener) {
+        listeners.add(listener)
     }
 
     /**
@@ -104,11 +103,12 @@ class Database(private val context: Context) {
         if (BuildConfig.DEBUG) {
             source.setLoggingEnabled(true)
         }
-        entityStoreHolder.store = KotlinEntityDataStore(source.configuration)
+        store = KotlinEntityDataStore(source.configuration)
+        listeners.forEach { it.update() }
     }
 
     private fun isOpen(): Boolean {
-        return entityStoreHolder.store != null
+        return store != null
     }
 
     /**
@@ -183,5 +183,13 @@ class Database(private val context: Context) {
          * Name of the internal database.
          */
         private const val DATABASE_NAME = "note_db"
+    }
+
+    init {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
+        dbFileSize = preferences.getInt(EisbaerApplication.PREF_DATABASE_FILE_SIZE, 0)
+        updateDatabase()
+        if (!isOpen()) openDatabase()
     }
 }
