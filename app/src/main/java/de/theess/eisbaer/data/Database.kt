@@ -15,6 +15,9 @@ import de.theess.eisbaer.EisbaerApplication
 import de.theess.eisbaer.Models
 import io.requery.android.sqlite.DatabaseSource
 import io.requery.sql.KotlinEntityDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.FileOutputStream
 
@@ -24,6 +27,13 @@ import java.io.FileOutputStream
 class Database(private val context: Context) {
 
     var store: KotlinEntityDataStore<Any>? = null
+        get() {
+            // Update the database in a background thread.
+            CoroutineScope(Dispatchers.IO).launch {
+                checkForUpdates()
+            }
+            return field
+        }
 
     /**
      * Open the database once to initialize the android_metadata table.
@@ -61,7 +71,10 @@ class Database(private val context: Context) {
             if (key == EisbaerApplication.PREF_DATABASE_URI) synchronized(this) {
                 Timber.d("database uri pref changed")
                 dbFileSize = 0
-                updateDatabase()
+                // Update the database in a background thread.
+                CoroutineScope(Dispatchers.IO).launch {
+                    checkForUpdates()
+                }
             }
         }
 
@@ -74,7 +87,7 @@ class Database(private val context: Context) {
      * database is copied into the application data directory and then opened.
      */
     @Synchronized
-    private fun updateDatabase() {
+    private fun checkForUpdates() {
         val uri = getExternalDatabaseUri(context)
         if (uri == null || !checkUriGrant(context, uri)) {
             Timber.i("No database file uri.")
@@ -89,7 +102,13 @@ class Database(private val context: Context) {
         }
 
         Timber.d("Database changed.")
+        updateDatabase(uri)
+    }
 
+    /**
+     * Updates the database in a background thread.
+     */
+    private fun updateDatabase(uri: Uri) {
         copyDatabase(context, uri)
         DbInitializer(context, DATABASE_NAME).initDatabase()
         openDatabase()
@@ -189,7 +208,10 @@ class Database(private val context: Context) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
         preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
         dbFileSize = preferences.getInt(EisbaerApplication.PREF_DATABASE_FILE_SIZE, 0)
-        updateDatabase()
-        if (!isOpen()) openDatabase()
+        // Update the database in a background thread.
+        CoroutineScope(Dispatchers.IO).launch {
+            checkForUpdates()
+            if (!isOpen()) openDatabase()
+        }
     }
 }
