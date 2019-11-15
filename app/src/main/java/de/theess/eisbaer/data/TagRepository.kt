@@ -1,22 +1,21 @@
 package de.theess.eisbaer.data
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import de.theess.eisbaer.EisbaerApplication
 import io.requery.kotlin.asc
 import timber.log.Timber
 
-class TagRepository private constructor(private val database: Database) {
+class TagRepository(private val database: Database) : AbstractRepository(database) {
 
     fun getAll(): LiveData<List<Tag>> {
         Timber.d("getAll")
-        return database.store
-            ?.run {
-                select(Tag::class)
-                    .orderBy(Tag::title.asc()).limit(QUERY_LIMIT)
-            }
-            ?.let { MutableLiveData(it.get().toList()) }
-            ?: MutableLiveData()
+        return toLiveData {
+            database.store
+                ?.run {
+                    select(Tag::class)
+                        .orderBy(Tag::title.asc()).limit(QUERY_LIMIT)
+                }?.get()?.toList()
+        }
     }
 
     companion object {
