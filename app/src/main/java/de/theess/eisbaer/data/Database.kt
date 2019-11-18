@@ -1,25 +1,20 @@
 package de.theess.eisbaer.data
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.core.content.edit
-import androidx.core.database.getIntOrNull
 import androidx.preference.PreferenceManager
 import de.theess.eisbaer.BuildConfig
 import de.theess.eisbaer.EisbaerApplication
 import de.theess.eisbaer.Models
 import io.requery.android.sqlite.DatabaseSource
 import io.requery.sql.KotlinEntityDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.FileOutputStream
+import kotlin.concurrent.fixedRateTimer
 
 /**
  * Manages the requery data store.
@@ -27,16 +22,11 @@ import java.io.FileOutputStream
 class Database(private val context: Context) {
 
     var store: KotlinEntityDataStore<Any>? = null
-        get() {
-            // Update the database in a background thread.
-            CoroutineScope(Dispatchers.IO).launch {
-                checkForUpdates()
-            }
-            return field
-        }
+
+    private var databaseSource: DatabaseSource? = null
 
     /**
-     * Open the database once to initialize the android_metadata table.
+     * Opens the database once to initialize the android_metadata table.
      * https://github.com/requery/requery/issues/856
      */
     internal class DbInitializer(context: Context, dbName: String) :
@@ -50,31 +40,35 @@ class Database(private val context: Context) {
         }
     }
 
+    /**
+     * Listeners interested in database changes.
+     */
     private val listeners: MutableList<DatabaseListener> = mutableListOf()
 
     /**
      * Size of the external database. This value is persisted to the preferences.
      */
-    private var dbFileSize: Int = 0
+    private var externalDatabaseHash: String = ""
         set(value) {
             field = value
             PreferenceManager.getDefaultSharedPreferences(context).edit {
-                putInt(EisbaerApplication.PREF_DATABASE_FILE_SIZE, value)
+                putString(EisbaerApplication.PREF_DATABASE_HASH, value)
             }
         }
 
     /**
-     * Resets the holder if the database uri pref changes.
+     * Reopens the database if the database uri pref changes.
      */
     private val preferenceListener: SharedPreferences.OnSharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == EisbaerApplication.PREF_DATABASE_URI) synchronized(this) {
                 Timber.d("database uri pref changed")
-                dbFileSize = 0
+
+                // Clear the saved hash.
+                externalDatabaseHash = ""
+
                 // Update the database in a background thread.
-                CoroutineScope(Dispatchers.IO).launch {
-                    checkForUpdates()
-                }
+                checkForUpdates()
             }
         }
 
@@ -83,80 +77,89 @@ class Database(private val context: Context) {
     }
 
     /**
-     * Gets and possibly initializes the store holder. If the holder is empty, the external
-     * database is copied into the application data directory and then opened.
+     * Copies the external database file to the internal database, if the external file is changed
+     * compared to the saved hash.
      */
     @Synchronized
     private fun checkForUpdates() {
-        val uri = getExternalDatabaseUri(context)
-        if (uri == null || !checkUriGrant(context, uri)) {
+        Timber.d("Checking for updates.")
+
+        val externalDbFile =
+            getExternalDatabaseUri(context)?.let { StorageFile(it, context.contentResolver) }
+
+        if (externalDbFile == null || !externalDbFile.checkUriGrant()) {
             Timber.i("No database file uri.")
             return
         }
 
-        if (context.getDatabasePath(DATABASE_NAME).exists()
-            && !externalDatabaseChanged(context, uri)
+        Timber.d("Database file: $externalDbFile")
+
+        val internalDatabasePath = context.getDatabasePath(DATABASE_NAME)
+        Timber.d("Internal db exists: ${internalDatabasePath.exists()}")
+
+        Timber.d("Hash of external db: ${externalDbFile.hash()}")
+        Timber.d("Saved hash: $externalDatabaseHash")
+
+
+        // Check for changes to the external db file.
+        if (internalDatabasePath.exists()
+            && externalDatabaseHash.isNotEmpty() && externalDbFile.hash() == externalDatabaseHash
         ) {
             Timber.d("Database has not changed.")
             return
         }
 
-        Timber.d("Database changed.")
-        updateDatabase(uri)
-    }
+        Timber.i("Database changed.")
 
-    /**
-     * Updates the database in a background thread.
-     */
-    private fun updateDatabase(uri: Uri) {
-        copyDatabase(context, uri)
-        DbInitializer(context, DATABASE_NAME).initDatabase()
+        close()
+        copyDatabase(context, externalDbFile)
         openDatabase()
+
+        // Save hash of the external db.
+        externalDatabaseHash = externalDbFile.hash()
     }
 
     /**
      * Opens the internal database.
      */
+    @Synchronized
     private fun openDatabase() {
-        val source = DatabaseSource(context, Models.DEFAULT, DATABASE_NAME, 1)
-        if (BuildConfig.DEBUG) {
-            source.setLoggingEnabled(true)
+        val internalDatabasePath = context.getDatabasePath(DATABASE_NAME)
+        if (!internalDatabasePath.exists()) {
+            Timber.i("Internal db file $internalDatabasePath does not exist.")
+            return
         }
-        store = KotlinEntityDataStore(source.configuration)
+
+        val newSource = DatabaseSource(context, Models.DEFAULT, DATABASE_NAME, 1)
+        if (BuildConfig.DEBUG) {
+            newSource.setLoggingEnabled(true)
+        }
+        databaseSource = newSource
+        store = KotlinEntityDataStore(newSource.configuration)
+
+        // Call listeners.
         listeners.forEach { it.update() }
     }
 
-    private fun isOpen(): Boolean {
-        return store != null
-    }
-
     /**
-     * Checks whether the external database file has changed.
+     * Closes the database.
      */
-    private fun externalDatabaseChanged(context: Context, uri: Uri): Boolean {
-        Timber.d("Checking database.")
-
-        val cursor = context.contentResolver.query(uri, null, null, null, null)
-
-        cursor?.use {
-            // moveToFirst() returns false if the cursor has 0 rows.
-            if (it.moveToFirst()) {
-                val size: Int = it.getIntOrNull(it.getColumnIndex(OpenableColumns.SIZE)) ?: 0
-                Timber.d("size: %d, previous size: %d", size, dbFileSize)
-                val changed = size != dbFileSize
-                dbFileSize = size
-                return changed
-            }
+    private fun close() {
+        if (store != null) {
+            store?.close()
+            store = null
         }
-
-        return true
+        if (databaseSource != null) {
+            databaseSource?.close()
+            databaseSource = null
+        }
     }
 
     /**
      * Copies the database selected in the preferences to the internal database.
      */
-    private fun copyDatabase(context: Context, externalDatabaseUri: Uri) {
-        Timber.d("copy database from $externalDatabaseUri")
+    private fun copyDatabase(context: Context, externalDbFile: StorageFile) {
+        Timber.d("copy database from $externalDbFile")
 
         // Internal database file.
         val dbPath = context.getDatabasePath(DATABASE_NAME)
@@ -164,28 +167,20 @@ class Database(private val context: Context) {
         // Make sure we have a path to the file.
         dbPath?.parentFile?.mkdirs()
 
+        // Delete the old internal database, if it exists.
+        dbPath.exists() && dbPath.delete()
+
         // Copy data.
         FileOutputStream(dbPath).use {
-            context.contentResolver.openInputStream(externalDatabaseUri)!!.copyTo(it)
+            val inputStream = externalDbFile.openInputStream()
+            inputStream.copyTo(it)
+            inputStream.close()
         }
+
+        // Make the database usable by requery.
+        DbInitializer(context, DATABASE_NAME).initDatabase()
 
         Timber.d("copyDatabase done")
-    }
-
-    /**
-     * Check whether we still can access the database uri.
-     */
-    private fun checkUriGrant(context: Context, uri: Uri): Boolean {
-        return try {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            true
-        } catch (e: Exception) {
-            Timber.d(e, "Failed to get uri grant.")
-            false
-        }
     }
 
     /**
@@ -197,21 +192,30 @@ class Database(private val context: Context) {
             ?.let { Uri.parse(it) }
     }
 
+    init {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+        // Listen for pref changes.
+        preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
+
+        externalDatabaseHash = preferences.getString(EisbaerApplication.PREF_DATABASE_HASH, "")!!
+
+        openDatabase()
+
+        // Update the database in a background timer.
+        fixedRateTimer("databaseUpdates", true, 2 * 1000, CHECK_INTERVAL) {
+            checkForUpdates()
+        }
+    }
+
     companion object {
         /**
          * Name of the internal database.
          */
         private const val DATABASE_NAME = "note_db"
-    }
-
-    init {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
-        dbFileSize = preferences.getInt(EisbaerApplication.PREF_DATABASE_FILE_SIZE, 0)
-        // Update the database in a background thread.
-        CoroutineScope(Dispatchers.IO).launch {
-            checkForUpdates()
-            if (!isOpen()) openDatabase()
-        }
+        /**
+         * Interval in milliseconds to check for updates to the external database file.
+         */
+        private const val CHECK_INTERVAL: Long = 10 * 1000
     }
 }

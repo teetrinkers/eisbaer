@@ -24,6 +24,6 @@ class EisbaerApplication : Application() {
 
     companion object {
         const val PREF_DATABASE_URI: String = "database_uri"
-        const val PREF_DATABASE_FILE_SIZE: String = "database_file_size"
+        const val PREF_DATABASE_HASH: String = "database_hash"
     }
 }
