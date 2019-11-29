@@ -21,24 +21,26 @@ import kotlin.concurrent.fixedRateTimer
  */
 class Database(private val context: Context) {
 
-    var store: KotlinEntityDataStore<Any>? = null
-
-    private var databaseSource: DatabaseSource? = null
+    companion object {
+        /**
+         * Name of the internal database.
+         */
+        private const val DATABASE_NAME = "note_db"
+        /**
+         * Interval in milliseconds to check for updates to the external database file.
+         */
+        private const val CHECK_INTERVAL: Long = 10 * 1000
+    }
 
     /**
-     * Opens the database once to initialize the android_metadata table.
-     * https://github.com/requery/requery/issues/856
+     * The requery entity store. This is null if the database is closed.
      */
-    internal class DbInitializer(context: Context, dbName: String) :
-        SQLiteOpenHelper(context, dbName, null, 1) {
-        override fun onCreate(db: SQLiteDatabase?) {}
-        override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {}
+    var store: KotlinEntityDataStore<Any>? = null
 
-        fun initDatabase() {
-            readableDatabase
-            close()
-        }
-    }
+    /**
+     * The requery database wrapper. This is null if the database is closed.
+     */
+    private var databaseSource: DatabaseSource? = null
 
     /**
      * Listeners interested in database changes.
@@ -71,6 +73,22 @@ class Database(private val context: Context) {
                 checkForUpdates()
             }
         }
+
+    init {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+        // Listen for pref changes.
+        preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
+
+        externalDatabaseHash = preferences.getString(EisbaerApplication.PREF_DATABASE_HASH, "")!!
+
+        openDatabase()
+
+        // Update the database in a background timer.
+        fixedRateTimer("databaseUpdates", true, 2 * 1000, CHECK_INTERVAL) {
+            checkForUpdates()
+        }
+    }
 
     fun addListener(listener: DatabaseListener) {
         listeners.add(listener)
@@ -112,7 +130,7 @@ class Database(private val context: Context) {
         Timber.i("Database changed.")
 
         close()
-        copyDatabase(context, externalDbFile)
+        copyDatabase(externalDbFile)
         openDatabase()
 
         // Save hash of the external db.
@@ -158,7 +176,7 @@ class Database(private val context: Context) {
     /**
      * Copies the database selected in the preferences to the internal database.
      */
-    private fun copyDatabase(context: Context, externalDbFile: StorageFile) {
+    private fun copyDatabase(externalDbFile: StorageFile) {
         Timber.d("copy database from $externalDbFile")
 
         // Internal database file.
@@ -178,9 +196,26 @@ class Database(private val context: Context) {
         }
 
         // Make the database usable by requery.
-        DbInitializer(context, DATABASE_NAME).initDatabase()
+        initDatabase()
 
         Timber.d("copyDatabase done")
+    }
+
+    /**
+     * Opens the database once to initialize the android_metadata table.
+     * https://github.com/requery/requery/issues/856
+     */
+    private fun initDatabase() {
+        val helper = object : SQLiteOpenHelper(context, DATABASE_NAME, null, 1) {
+            override fun onCreate(db: SQLiteDatabase?) {}
+            override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {}
+
+            fun initDatabase() {
+                readableDatabase
+                close()
+            }
+        }
+        helper.initDatabase()
     }
 
     /**
@@ -190,32 +225,5 @@ class Database(private val context: Context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getString(EisbaerApplication.PREF_DATABASE_URI, null)
             ?.let { Uri.parse(it) }
-    }
-
-    init {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-        // Listen for pref changes.
-        preferences.registerOnSharedPreferenceChangeListener(preferenceListener)
-
-        externalDatabaseHash = preferences.getString(EisbaerApplication.PREF_DATABASE_HASH, "")!!
-
-        openDatabase()
-
-        // Update the database in a background timer.
-        fixedRateTimer("databaseUpdates", true, 2 * 1000, CHECK_INTERVAL) {
-            checkForUpdates()
-        }
-    }
-
-    companion object {
-        /**
-         * Name of the internal database.
-         */
-        private const val DATABASE_NAME = "note_db"
-        /**
-         * Interval in milliseconds to check for updates to the external database file.
-         */
-        private const val CHECK_INTERVAL: Long = 10 * 1000
     }
 }
