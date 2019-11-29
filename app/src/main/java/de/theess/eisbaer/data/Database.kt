@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.net.Uri
 import androidx.core.content.edit
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.preference.PreferenceManager
 import de.theess.eisbaer.BuildConfig
 import de.theess.eisbaer.EisbaerApplication
@@ -102,6 +104,13 @@ class Database(private val context: Context) {
     private fun checkForUpdates() {
         Timber.d("Checking for updates.")
 
+        // Only check for updates while the app is in the foreground.
+        val lifecycleState = ProcessLifecycleOwner.get().lifecycle.currentState
+        if (!lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) {
+            Timber.d("Lifecycle state is not at least RESUMED. State = $lifecycleState.")
+            return
+        }
+
         val externalDbFile =
             getExternalDatabaseUri(context)?.let { StorageFile(it, context.contentResolver) }
 
@@ -113,11 +122,10 @@ class Database(private val context: Context) {
         Timber.d("Database file: $externalDbFile")
 
         val internalDatabasePath = context.getDatabasePath(DATABASE_NAME)
-        Timber.d("Internal db exists: ${internalDatabasePath.exists()}")
 
+        Timber.d("Internal db exists: ${internalDatabasePath.exists()}")
         Timber.d("Hash of external db: ${externalDbFile.hash()}")
         Timber.d("Saved hash: $externalDatabaseHash")
-
 
         // Check for changes to the external db file.
         if (internalDatabasePath.exists()
