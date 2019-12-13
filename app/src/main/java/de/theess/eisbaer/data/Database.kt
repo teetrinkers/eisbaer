@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.net.Uri
 import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.preference.PreferenceManager
 import de.theess.eisbaer.BuildConfig
@@ -33,6 +35,10 @@ class Database(private val context: Context) {
          */
         private const val CHECK_INTERVAL: Long = 10 * 1000
     }
+
+    private var _status: MutableLiveData<String> = MutableLiveData("")
+    val status : LiveData<String>
+        get() = _status
 
     /**
      * The requery entity store. This is null if the database is closed.
@@ -103,6 +109,7 @@ class Database(private val context: Context) {
     @Synchronized
     private fun checkForUpdates() {
         Timber.d("Checking for updates.")
+        _status.postValue("")
 
         // Only check for updates while the app is in the foreground.
         val lifecycleState = ProcessLifecycleOwner.get().lifecycle.currentState
@@ -143,6 +150,8 @@ class Database(private val context: Context) {
 
         // Save hash of the external db.
         externalDatabaseHash = externalDbFile.hash()
+
+        _status.postValue("Database updated")
     }
 
     /**

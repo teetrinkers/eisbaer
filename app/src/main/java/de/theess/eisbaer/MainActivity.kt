@@ -15,6 +15,7 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import de.theess.eisbaer.data.TagRepository
 import de.theess.eisbaer.ui.note.NoteViewFragmentDirections
 import kotlinx.android.synthetic.main.activity_main.*
@@ -58,6 +59,14 @@ class MainActivity : AppCompatActivity() {
                         addTagMenuItem(navView.menu, tag)
                     }
             })
+
+        // Show messages from the database in the snackbar.
+        (application as EisbaerApplication).database.status.observe(this, Observer { message ->
+            if (message != null && !message.isEmpty()) {
+                Snackbar.make(drawerLayout, message, Snackbar.LENGTH_LONG)
+                    .show()
+            }
+        })
     }
 
     /**
