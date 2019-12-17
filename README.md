@@ -35,13 +35,11 @@ This app can browse notes from an SQLite database which was edited using the Bea
 
 ## Sync
 
-There is currently no sync functionality built into Eisbär. To sync data between the android phone and the desktop app, you will need to update the sqlite database file either manually, or using a third-party solution such as [Syncthing](https://syncthing.net).
+There is currently no sync functionality built into Eisbär. To sync data between the android phone and the desktop app, you will need to update the sqlite database file either manually, using a third-party solution such as [Syncthing](https://syncthing.net), or by copying it to Google Drive.
 
-Every time the app process is started, it copies the sqlite file into the private app data folder. If the sqlite file was updated, you need to stop the Eisbär app process, e.g. by removing it from the recent apps screen. Then start Eisbär again and the app will read the updated sqlite file.
+On startup and then every 10 seconds, Eisbär checks the database file for changes, i.e., different size or modification date. If changes are detected, the external database file is copied into the private app data directory and the internal database is reopened. In the note list view, you can also use swipe-to-refresh to tell the document provider which provides the external database file, e.g. Google Drive, to refresh / download the file.
 
-Working with an external sqlite database file appears to not be possible in android. Android apps can only open sqlite databases located in a specific folder in the private app data directory. That's why Eisbär copies the sqlite database when the app is launched. This may take a few seconds if you have a lot of notes.
-
-Reacting to database changes will need some work or may change to some kind of online sync in the future.
+Working with an external sqlite database file appears to not be possible in android. Android apps can only open sqlite databases located in a specific folder in the private app data directory. That's why Eisbär copies the sqlite database when it detects changes to the external file. This may take a few seconds if you have a lot of notes.
 
 ## Why requery and not Room?
 
