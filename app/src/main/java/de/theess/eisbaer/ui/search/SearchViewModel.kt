@@ -36,4 +36,11 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         }
         _query.value = input
     }
+
+    /**
+     * Tell the content provider to refresh (e.g. download) the database file. Works only on Android 8+.
+     */
+    fun refresh() {
+        getApplication<EisbaerApplication>().database.refresh()
+    }
 }

@@ -103,6 +103,23 @@ class Database(private val context: Context) {
     }
 
     /**
+     * Tell the content provider to refresh (e.g. download) the database file. Works only on Android 8+.
+     */
+    fun refresh() {
+        val externalDbFile = getExternalDatabaseFile(context)
+        if (externalDbFile == null || !externalDbFile.checkUriGrant()) {
+            Timber.i("No database file uri.")
+            return
+        }
+
+        Timber.d("Refresh started.")
+        externalDbFile.refresh()
+        Timber.d("Refresh done.")
+
+        checkForUpdates()
+    }
+
+    /**
      * Copies the external database file to the internal database, if the external file is changed
      * compared to the saved hash.
      */
@@ -118,9 +135,7 @@ class Database(private val context: Context) {
             return
         }
 
-        val externalDbFile =
-            getExternalDatabaseUri(context)?.let { StorageFile(it, context.contentResolver) }
-
+        val externalDbFile = getExternalDatabaseFile(context)
         if (externalDbFile == null || !externalDbFile.checkUriGrant()) {
             Timber.i("No database file uri.")
             return
@@ -238,9 +253,10 @@ class Database(private val context: Context) {
     /**
      * Gets the URI to the external database file from the preferences.
      */
-    private fun getExternalDatabaseUri(context: Context): Uri? {
+    private fun getExternalDatabaseFile(context: Context): StorageFile? {
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getString(EisbaerApplication.PREF_DATABASE_URI, null)
             ?.let { Uri.parse(it) }
+            ?.let { StorageFile(it, context.contentResolver) }
     }
 }

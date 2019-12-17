@@ -51,6 +51,12 @@ class SearchFragment : Fragment(), SearchView.OnQueryTextListener {
 
         // Show current query in the search view.
         searchView.setQuery(viewModel.query.value, true)
+
+        // handle swipe-to-refresh
+        swiperefresh.setOnRefreshListener {
+            viewModel.refresh()
+            swiperefresh.isRefreshing = false
+        }
     }
 
     override fun onCreateView(

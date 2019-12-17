@@ -3,6 +3,7 @@ package de.theess.eisbaer.data
 import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import androidx.core.database.getIntOrNull
@@ -13,10 +14,10 @@ import java.io.InputStream
 /**
  * A file from the Storage Access Framework.
  */
-class StorageFile(val uri: Uri, private val contentResolver: ContentResolver) {
+class StorageFile(private val uri: Uri, private val contentResolver: ContentResolver) {
 
-    var size: Int = 0
-    var lastModified: Long = 0
+    private var size: Int = 0
+    private var lastModified: Long = 0
 
     init {
         readMetadata()
@@ -70,4 +71,14 @@ class StorageFile(val uri: Uri, private val contentResolver: ContentResolver) {
         return contentResolver.openInputStream(uri)!!
     }
 
+    /**
+     * Tell the content provider to refresh (e.g. download) the file. Works only on Android 8+.
+     */
+    fun refresh() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            contentResolver.refresh(uri, null, null)
+        } else {
+            Timber.i("Refresh not supported on API level %d.", Build.VERSION.SDK_INT)
+        }
+    }
 }
