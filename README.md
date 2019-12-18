@@ -17,12 +17,11 @@ This app can browse notes from an SQLite database which was edited using the Bea
 * View notes
 * Search notes
 * Rendered Markdown
+* List of tags
 
 ### Not now / Maybe later
 
-* List of tags
 * Support for images and attachments  
-* Some kind of sync
 
 ### Probably never
 
