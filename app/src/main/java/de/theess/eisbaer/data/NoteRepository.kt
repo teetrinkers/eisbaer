@@ -2,6 +2,7 @@ package de.theess.eisbaer.data
 
 import androidx.lifecycle.LiveData
 import de.theess.eisbaer.EisbaerApplication
+import io.requery.kotlin.Logical
 import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import io.requery.kotlin.like
@@ -9,11 +10,13 @@ import timber.log.Timber
 
 class NoteRepository(private val database: Database) : AbstractRepository(database) {
 
+    // Casts to Logical<*, *> seem to be need with recent Kotlin releases.
+
     fun getAll(): LiveData<List<Note>> {
         return toLiveData {
             database.store?.run {
                 select(Note::class)
-                    .where(Note::trashed.eq(0))
+                    .where(Note::trashed.eq(0) as Logical<*, *>)
                     .orderBy(Note::modificationDateRaw.desc()).limit(QUERY_LIMIT)
             }?.get()?.toList()
         }
@@ -25,7 +28,8 @@ class NoteRepository(private val database: Database) : AbstractRepository(databa
             database.store
                 ?.run {
                     select(Note::class)
-                        .where(Note::content.like("%$query%")).and(Note::trashed.eq(0))
+                        .where(Note::content.like("%$query%") as Logical<*, *>)
+                        .and(Note::trashed.eq(0) as Logical<*, *>)
                         .orderBy(Note::modificationDateRaw.desc()).limit(QUERY_LIMIT)
                 }
                 ?.get()?.toList()
