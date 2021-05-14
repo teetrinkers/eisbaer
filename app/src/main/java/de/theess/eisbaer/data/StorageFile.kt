@@ -9,6 +9,7 @@ import android.provider.OpenableColumns
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import timber.log.Timber
+import java.io.FileNotFoundException
 import java.io.InputStream
 
 /**
@@ -73,7 +74,12 @@ class StorageFile(private val uri: Uri, private val contentResolver: ContentReso
     }
 
     fun openInputStream(): InputStream? {
-        return contentResolver.openInputStream(uri)
+        try {
+            return contentResolver.openInputStream(uri)
+        } catch (ex : FileNotFoundException) {
+            Timber.e("Database cannot be opened: $ex")
+            return null
+        }
     }
 
     /**
