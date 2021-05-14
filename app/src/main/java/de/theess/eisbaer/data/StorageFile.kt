@@ -20,7 +20,9 @@ class StorageFile(private val uri: Uri, private val contentResolver: ContentReso
     private var lastModified: Long = 0
 
     init {
-        readMetadata()
+        if (checkUriGrant()) {
+            readMetadata()
+        }
     }
 
     private fun readMetadata() {
@@ -50,7 +52,7 @@ class StorageFile(private val uri: Uri, private val contentResolver: ContentReso
     /**
      * Returns a hash of the file based on the metadata.
      */
-    fun hash() : String {
+    fun hash(): String {
         return "size=$size, lastModified=$lastModified, uri=$uri"
     }
 
@@ -59,7 +61,10 @@ class StorageFile(private val uri: Uri, private val contentResolver: ContentReso
      */
     fun checkUriGrant(): Boolean {
         return try {
-            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.takePersistableUriPermission(
+                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
             true
         } catch (e: Exception) {
             Timber.d(e, "Failed to get uri grant.")
