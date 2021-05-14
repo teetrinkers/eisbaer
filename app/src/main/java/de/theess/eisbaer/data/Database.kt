@@ -211,6 +211,9 @@ class Database(private val context: Context) {
     private fun copyDatabase(externalDbFile: StorageFile) {
         Timber.d("copy database from $externalDbFile")
 
+        // Refresh the external file.
+        externalDbFile.refresh()
+
         // Internal database file.
         val dbPath = context.getDatabasePath(DATABASE_NAME)
 
@@ -221,10 +224,13 @@ class Database(private val context: Context) {
         dbPath.exists() && dbPath.delete()
 
         // Copy data.
-        FileOutputStream(dbPath).use {
-            val inputStream = externalDbFile.openInputStream()
-            inputStream.copyTo(it)
-            inputStream.close()
+        FileOutputStream(dbPath).use { outputStream ->
+            externalDbFile.openInputStream().use { inputStream ->
+                if (inputStream == null) {
+                    Timber.d("Cannot open input stream.")
+                }
+                inputStream?.copyTo(outputStream)
+            }
         }
 
         // Make the database usable by requery.

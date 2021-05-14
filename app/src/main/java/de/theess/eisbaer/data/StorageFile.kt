@@ -72,8 +72,8 @@ class StorageFile(private val uri: Uri, private val contentResolver: ContentReso
         }
     }
 
-    fun openInputStream(): InputStream {
-        return contentResolver.openInputStream(uri)!!
+    fun openInputStream(): InputStream? {
+        return contentResolver.openInputStream(uri)
     }
 
     /**
